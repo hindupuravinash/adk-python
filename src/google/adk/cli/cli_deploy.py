@@ -63,7 +63,7 @@ CMD adk {command} --port={port} {host_option} {service_option} {trace_to_cloud_o
 """
 
 _AGENT_ENGINE_APP_TEMPLATE: Final[str] = """
-from vertexai.preview.reasoning_engines import AdkApp
+from vertexai.agent_engines import AdkApp
 
 if {is_config_agent}:
   from google.adk.agents import config_agent_utils
@@ -74,13 +74,292 @@ if {is_config_agent}:
     # This path is used to support the file structure in Agent Engine.
     root_agent = config_agent_utils.from_config("./{temp_folder}/{app_name}/root_agent.yaml")
 else:
-  from {app_name}.agent import root_agent
+  from {app_name}.agent import {adk_app_object}
 
 adk_app = AdkApp(
-  agent=root_agent,
+  {adk_app_type}={adk_app_object},
   enable_tracing={trace_to_cloud_option},
 )
 """
+
+_AGENT_ENGINE_CLASS_METHODS = [
+    {
+        'name': 'get_session',
+        'description': (
+            'Deprecated. Use async_get_session instead.\n\n        Get a'
+            ' session for the given user.\n        '
+        ),
+        'parameters': {
+            'properties': {
+                'user_id': {'type': 'string'},
+                'session_id': {'type': 'string'},
+            },
+            'required': ['user_id', 'session_id'],
+            'type': 'object',
+        },
+        'api_mode': '',
+    },
+    {
+        'name': 'list_sessions',
+        'description': (
+            'Deprecated. Use async_list_sessions instead.\n\n        List'
+            ' sessions for the given user.\n        '
+        ),
+        'parameters': {
+            'properties': {'user_id': {'type': 'string'}},
+            'required': ['user_id'],
+            'type': 'object',
+        },
+        'api_mode': '',
+    },
+    {
+        'name': 'create_session',
+        'description': (
+            'Deprecated. Use async_create_session instead.\n\n        Creates a'
+            ' new session.\n        '
+        ),
+        'parameters': {
+            'properties': {
+                'user_id': {'type': 'string'},
+                'session_id': {'type': 'string', 'nullable': True},
+                'state': {'type': 'object', 'nullable': True},
+            },
+            'required': ['user_id'],
+            'type': 'object',
+        },
+        'api_mode': '',
+    },
+    {
+        'name': 'delete_session',
+        'description': (
+            'Deprecated. Use async_delete_session instead.\n\n        Deletes a'
+            ' session for the given user.\n        '
+        ),
+        'parameters': {
+            'properties': {
+                'user_id': {'type': 'string'},
+                'session_id': {'type': 'string'},
+            },
+            'required': ['user_id', 'session_id'],
+            'type': 'object',
+        },
+        'api_mode': '',
+    },
+    {
+        'name': 'async_get_session',
+        'description': (
+            'Get a session for the given user.\n\n        Args:\n           '
+            ' user_id (str):\n                Required. The ID of the user.\n  '
+            '          session_id (str):\n                Required. The ID of'
+            ' the session.\n            **kwargs (dict[str, Any]):\n           '
+            '     Optional. Additional keyword arguments to pass to the\n      '
+            '          session service.\n\n        Returns:\n           '
+            ' Session: The session instance (if any). It returns None if the\n '
+            '           session is not found.\n\n        Raises:\n           '
+            ' RuntimeError: If the session is not found.\n        '
+        ),
+        'parameters': {
+            'properties': {
+                'user_id': {'type': 'string'},
+                'session_id': {'type': 'string'},
+            },
+            'required': ['user_id', 'session_id'],
+            'type': 'object',
+        },
+        'api_mode': 'async',
+    },
+    {
+        'name': 'async_list_sessions',
+        'description': (
+            'List sessions for the given user.\n\n        Args:\n           '
+            ' user_id (str):\n                Required. The ID of the user.\n  '
+            '          **kwargs (dict[str, Any]):\n                Optional.'
+            ' Additional keyword arguments to pass to the\n               '
+            ' session service.\n\n        Returns:\n           '
+            ' ListSessionsResponse: The list of sessions.\n        '
+        ),
+        'parameters': {
+            'properties': {'user_id': {'type': 'string'}},
+            'required': ['user_id'],
+            'type': 'object',
+        },
+        'api_mode': 'async',
+    },
+    {
+        'name': 'async_create_session',
+        'description': (
+            'Creates a new session.\n\n        Args:\n            user_id'
+            ' (str):\n                Required. The ID of the user.\n          '
+            '  session_id (str):\n                Optional. The ID of the'
+            ' session. If not provided, an ID\n                will be be'
+            ' generated for the session.\n            state (dict[str, Any]):\n'
+            '                Optional. The initial state of the session.\n     '
+            '       **kwargs (dict[str, Any]):\n                Optional.'
+            ' Additional keyword arguments to pass to the\n               '
+            ' session service.\n\n        Returns:\n            Session: The'
+            ' newly created session instance.\n        '
+        ),
+        'parameters': {
+            'properties': {
+                'user_id': {'type': 'string'},
+                'session_id': {'type': 'string', 'nullable': True},
+                'state': {'type': 'object', 'nullable': True},
+            },
+            'required': ['user_id'],
+            'type': 'object',
+        },
+        'api_mode': 'async',
+    },
+    {
+        'name': 'async_delete_session',
+        'description': (
+            'Deletes a session for the given user.\n\n        Args:\n          '
+            '  user_id (str):\n                Required. The ID of the user.\n '
+            '           session_id (str):\n                Required. The ID of'
+            ' the session.\n            **kwargs (dict[str, Any]):\n           '
+            '     Optional. Additional keyword arguments to pass to the\n      '
+            '          session service.\n        '
+        ),
+        'parameters': {
+            'properties': {
+                'user_id': {'type': 'string'},
+                'session_id': {'type': 'string'},
+            },
+            'required': ['user_id', 'session_id'],
+            'type': 'object',
+        },
+        'api_mode': 'async',
+    },
+    {
+        'name': 'async_add_session_to_memory',
+        'description': (
+            'Generates memories.\n\n        Args:\n            session'
+            ' (Dict[str, Any]):\n                Required. The session to use'
+            ' for generating memories. It should\n                be a'
+            ' dictionary representing an ADK Session object, e.g.\n            '
+            '    session.model_dump(mode="json").\n        '
+        ),
+        'parameters': {
+            'properties': {
+                'session': {'additionalProperties': True, 'type': 'object'}
+            },
+            'required': ['session'],
+            'type': 'object',
+        },
+        'api_mode': 'async',
+    },
+    {
+        'name': 'async_search_memory',
+        'description': (
+            'Searches memories for the given user.\n\n        Args:\n          '
+            '  user_id: The id of the user.\n            query: The query to'
+            ' match the memories on.\n\n        Returns:\n            A'
+            ' SearchMemoryResponse containing the matching memories.\n        '
+        ),
+        'parameters': {
+            'properties': {
+                'user_id': {'type': 'string'},
+                'query': {'type': 'string'},
+            },
+            'required': ['user_id', 'query'],
+            'type': 'object',
+        },
+        'api_mode': 'async',
+    },
+    {
+        'name': 'stream_query',
+        'description': (
+            'Deprecated. Use async_stream_query instead.\n\n        Streams'
+            ' responses from the ADK application in response to a message.\n\n '
+            '       Args:\n            message (Union[str, Dict[str, Any]]):\n '
+            '               Required. The message to stream responses for.\n   '
+            '         user_id (str):\n                Required. The ID of the'
+            ' user.\n            session_id (str):\n                Optional.'
+            ' The ID of the session. If not provided, a new\n               '
+            ' session will be created for the user.\n            run_config'
+            ' (Optional[Dict[str, Any]]):\n                Optional. The run'
+            ' config to use for the query. If you want to\n                pass'
+            ' in a `run_config` pydantic object, you can pass in a dict\n      '
+            '          representing it as'
+            ' `run_config.model_dump(mode="json")`.\n            **kwargs'
+            ' (dict[str, Any]):\n                Optional. Additional keyword'
+            ' arguments to pass to the\n                runner.\n\n       '
+            ' Yields:\n            The output of querying the ADK'
+            ' application.\n        '
+        ),
+        'parameters': {
+            'properties': {
+                'message': {
+                    'anyOf': [
+                        {'type': 'string'},
+                        {'additionalProperties': True, 'type': 'object'},
+                    ]
+                },
+                'user_id': {'type': 'string'},
+                'session_id': {'type': 'string', 'nullable': True},
+                'run_config': {'type': 'object', 'nullable': True},
+            },
+            'required': ['message', 'user_id'],
+            'type': 'object',
+        },
+        'api_mode': 'stream',
+    },
+    {
+        'name': 'async_stream_query',
+        'description': (
+            'Streams responses asynchronously from the ADK application.\n\n    '
+            '    Args:\n            message (str):\n                Required.'
+            ' The message to stream responses for.\n            user_id'
+            ' (str):\n                Required. The ID of the user.\n          '
+            '  session_id (str):\n                Optional. The ID of the'
+            ' session. If not provided, a new\n                session will be'
+            ' created for the user.\n            run_config (Optional[Dict[str,'
+            ' Any]]):\n                Optional. The run config to use for the'
+            ' query. If you want to\n                pass in a `run_config`'
+            ' pydantic object, you can pass in a dict\n               '
+            ' representing it as `run_config.model_dump(mode="json")`.\n       '
+            '     **kwargs (dict[str, Any]):\n                Optional.'
+            ' Additional keyword arguments to pass to the\n               '
+            ' runner.\n\n        Yields:\n            Event dictionaries'
+            ' asynchronously.\n        '
+        ),
+        'parameters': {
+            'properties': {
+                'message': {
+                    'anyOf': [
+                        {'type': 'string'},
+                        {'additionalProperties': True, 'type': 'object'},
+                    ]
+                },
+                'user_id': {'type': 'string'},
+                'session_id': {'type': 'string', 'nullable': True},
+                'run_config': {'type': 'object', 'nullable': True},
+            },
+            'required': ['message', 'user_id'],
+            'type': 'object',
+        },
+        'api_mode': 'async_stream',
+    },
+    {
+        'name': 'streaming_agent_run_with_events',
+        'description': (
+            'Streams responses asynchronously from the ADK application.\n\n    '
+            '    In general, you should use `async_stream_query` instead, as it'
+            ' has a\n        more structured API and works with the respective'
+            ' ADK services that\n        you have defined for the AdkApp. This'
+            ' method is primarily meant for\n        invocation from'
+            ' AgentSpace.\n\n        Args:\n            request_json (str):\n  '
+            '              Required. The request to stream responses for.\n   '
+            '     '
+        ),
+        'parameters': {
+            'properties': {'request_json': {'type': 'string'}},
+            'required': ['request_json'],
+            'type': 'object',
+        },
+        'api_mode': 'async_stream',
+    },
+]
 
 
 def _resolve_project(project_in_option: Optional[str]) -> str:
@@ -346,6 +625,8 @@ def to_agent_engine(
     adk_app: str,
     staging_bucket: str,
     trace_to_cloud: bool,
+    express_mode_api_key: Optional[str] = None,
+    adk_app_object: Optional[str] = None,
     agent_engine_id: Optional[str] = None,
     absolutize_imports: bool = True,
     project: Optional[str] = None,
@@ -370,11 +651,11 @@ def to_agent_engine(
   The contents of `adk_app` should look something like:
 
   ```
-  from agent import root_agent
-  from vertexai.preview.reasoning_engines import AdkApp
+  from agent import <adk_app_object>
+  from vertexai.agent_engines import AdkApp
 
   adk_app = AdkApp(
-    agent=root_agent,
+    agent=<adk_app_object>,  # or `app=<adk_app_object>`
     enable_tracing=True,
   )
   ```
@@ -388,6 +669,11 @@ def to_agent_engine(
       instance.
     staging_bucket (str): The GCS bucket for staging the deployment artifacts.
     trace_to_cloud (bool): Whether to enable Cloud Trace.
+    express_mode_api_key (str): Optional. The API key to use for Express Mode.
+      If not provided, the API key from the GOOGLE_API_KEY environment variable
+      will be used. It will only be used if GOOGLE_GENAI_USE_VERTEXAI is true.
+    adk_app_object (str): Optional. The Python object corresponding to the root
+      ADK agent or app.
     agent_engine_id (str): Optional. The ID of the Agent Engine instance to
       update. If not specified, a new Agent Engine instance will be created.
     absolutize_imports (bool): Optional. Default is True. Whether to absolutize
@@ -431,7 +717,6 @@ def to_agent_engine(
     import sys
 
     import vertexai
-    from vertexai import agent_engines
 
     sys.path.append(temp_folder)  # To register the adk_app operations
     project = _resolve_project(project)
@@ -485,7 +770,7 @@ def to_agent_engine(
         )
       agent_config['requirements'] = requirements_file
 
-    env_vars = None
+    env_vars = {}
     if not env_file:
       # Attempt to read the env variables from .env in the dir (if any).
       env_file = os.path.join(agent_folder, '.env')
@@ -518,6 +803,15 @@ def to_agent_engine(
           else:
             region = env_region
             click.echo(f'{region=} set by GOOGLE_CLOUD_LOCATION in {env_file}')
+    if express_mode_api_key:
+      if 'GOOGLE_API_KEY' in env_vars:
+        click.secho(
+            'Ignoring GOOGLE_API_KEY in .env as `--express_mode_api_key` was'
+            ' explicitly passed and takes precedence',
+            fg='yellow',
+        )
+      else:
+        env_vars['GOOGLE_API_KEY'] = express_mode_api_key
     if env_vars:
       if 'env_vars' in agent_config:
         click.echo(
@@ -527,10 +821,11 @@ def to_agent_engine(
     # Set env_vars in agent_config to None if it is not set.
     agent_config['env_vars'] = agent_config.get('env_vars', env_vars)
 
-    vertexai.init(
+    client = vertexai.Client(
         project=project,
         location=region,
         staging_bucket=staging_bucket,
+        api_key=express_mode_api_key,
     )
     click.echo('Vertex AI initialized.')
 
@@ -541,6 +836,16 @@ def to_agent_engine(
       is_config_agent = True
 
     adk_app_file = os.path.join(temp_folder, f'{adk_app}.py')
+    if adk_app_object == 'root_agent':
+      adk_app_type = 'agent'
+    elif adk_app_object == 'app':
+      adk_app_type = 'app'
+    else:
+      click.echo(
+          'Invalid adk_app_object: {adk_app_object}. Please use "root_agent"'
+          ' or "app".'
+      )
+      return
     with open(adk_app_file, 'w', encoding='utf-8') as f:
       f.write(
           _AGENT_ENGINE_APP_TEMPLATE.format(
@@ -549,6 +854,8 @@ def to_agent_engine(
               is_config_agent=is_config_agent,
               temp_folder=temp_folder,
               agent_folder=agent_folder,
+              adk_app_object=adk_app_object,
+              adk_app_type=adk_app_type,
           )
       )
     click.echo(f'Created {adk_app_file}')
@@ -570,34 +877,17 @@ def to_agent_engine(
               click.echo(f'The following exception was raised: {e}')
 
     click.echo('Deploying to agent engine...')
-    agent_config['agent_engine'] = agent_engines.ModuleAgent(
-        module_name=adk_app,
-        agent_name='adk_app',
-        register_operations={
-            '': [
-                'get_session',
-                'list_sessions',
-                'create_session',
-                'delete_session',
-            ],
-            'async': [
-                'async_get_session',
-                'async_list_sessions',
-                'async_create_session',
-                'async_delete_session',
-            ],
-            'async_stream': ['async_stream_query'],
-            'stream': ['stream_query', 'streaming_agent_run_with_events'],
-        },
-        sys_paths=[temp_folder[1:]],
-        agent_framework='google-adk',
-    )
+    agent_config['entrypoint_module'] = adk_app
+    agent_config['entrypoint_object'] = 'adk_app'
+    agent_config['source_packages'] = [temp_folder[1:]]
+    agent_config['class_methods'] = _AGENT_ENGINE_CLASS_METHODS
+    # agent_config['agent_framework'] = 'google-adk'
 
     if not agent_engine_id:
-      agent_engines.create(**agent_config)
+      client.agent_engines.create(config=agent_config)
     else:
       resource_name = f'projects/{project}/locations/{region}/reasoningEngines/{agent_engine_id}'
-      agent_engines.update(resource_name=resource_name, **agent_config)
+      client.agent_engines.update(name=resource_name, config=agent_config)
   finally:
     click.echo(f'Cleaning up the temp folder: {temp_folder}')
     shutil.rmtree(temp_folder)
