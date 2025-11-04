@@ -631,7 +631,7 @@ def to_agent_engine(
     adk_app: str,
     staging_bucket: str,
     trace_to_cloud: Optional[bool] = None,
-    express_mode_api_key: Optional[str] = None,
+    api_key: Optional[str] = None,
     adk_app_object: Optional[str] = None,
     agent_engine_id: Optional[str] = None,
     absolutize_imports: bool = True,
@@ -674,7 +674,7 @@ def to_agent_engine(
       instance.
     staging_bucket (str): The GCS bucket for staging the deployment artifacts.
     trace_to_cloud (bool): Whether to enable Cloud Trace.
-    express_mode_api_key (str): Optional. The API key to use for Express Mode.
+    api_key (str): Optional. The API key to use for Express Mode.
       If not provided, the API key from the GOOGLE_API_KEY environment variable
       will be used. It will only be used if GOOGLE_GENAI_USE_VERTEXAI is true.
     adk_app_object (str): Optional. The Python object corresponding to the root
@@ -818,18 +818,16 @@ def to_agent_engine(
           else:
             region = env_region
             click.echo(f'{region=} set by GOOGLE_CLOUD_LOCATION in {env_file}')
-    if express_mode_api_key:
+    if api_key:
       if 'GOOGLE_API_KEY' in env_vars:
         click.secho(
-            'Ignoring GOOGLE_API_KEY in .env as `--express_mode_api_key` was'
+            'Ignoring GOOGLE_API_KEY in .env as `--api_key` was'
             ' explicitly passed and takes precedence',
             fg='yellow',
         )
       else:
         env_vars['GOOGLE_GENAI_USE_VERTEXAI'] = '1'
-        env_vars['GOOGLE_API_KEY'] = express_mode_api_key
-    if trace_to_cloud is False:
-      env_vars['GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY'] = 'false'
+        env_vars['GOOGLE_API_KEY'] = api_key
     if env_vars:
       if 'env_vars' in agent_config:
         click.echo(
@@ -841,9 +839,9 @@ def to_agent_engine(
 
     import vertexai
 
-    if express_mode_api_key:
+    if api_key:
       click.echo('Initializing Vertex AI in Express Mode with API key...')
-      client = vertexai.Client(api_key=express_mode_api_key)
+      client = vertexai.Client(api_key=api_key)
     else:
       click.echo('Initializing Vertex AI...')
       client = vertexai.Client(project=project, location=region)
@@ -876,7 +874,7 @@ def to_agent_engine(
               agent_folder=agent_folder,
               adk_app_object=adk_app_object,
               adk_app_type=adk_app_type,
-              express_mode=express_mode_api_key is not None,
+              express_mode=api_key is not None,
           )
       )
     click.echo(f'Created {adk_app_file}')
