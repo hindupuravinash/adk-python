@@ -898,9 +898,8 @@ def to_agent_engine(
           fg='green',
       )
     else:
-      resource_name = f'projects/{project}/locations/{region}/reasoningEngines/{agent_engine_id}'
-      client.agent_engines.update(name=resource_name, config=agent_config)
-      click.secho(f'✅ Updated agent engine: {resource_name}', fg='green')
+      client.agent_engines.update(name=agent_engine_id, config=agent_config)
+      click.secho(f'✅ Updated agent engine: {agent_engine_id}', fg='green')
   finally:
     click.echo(f'Cleaning up the temp folder: {temp_folder}')
     shutil.rmtree(temp_folder)
